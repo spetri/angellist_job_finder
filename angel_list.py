@@ -1,7 +1,5 @@
 #============================================================================
-# Lob Challenge
 # By: Sabba Petri
-# Date: 31 October 2014
 # NOTE: I wrote this using Python v2.7.6. Not tested using Python v3.
 #============================================================================
 
@@ -20,24 +18,29 @@ def main(query):
     return False
   name = person.replace(' ', '%20')
   user_id = getUserId(name)
-  getUserInformation(user_id)
+  user_info = getUserInformation(user_id)
+  getJobs(user_info)
 
 # getUserInformation: Using id of user, gets full user information, including role and location ids
 def getUserInformation(user_id):
   user_data = connectionInformation(connectUser(user_id))
   location_id = getLocationId(user_data)
   role_id = getRoleId(user_data)
-  getJobs(location_id, role_id)
+  return createUserDataStructure(location_id, role_id)
+
+# createDataStructure: Returns user_info dict with location/role ids
+def createUserDataStructure(location_id, role_id):
+  return { 'location_id': location_id, 'role_id': role_id }
 
 # getJobs: Find all jobs consistent with the location and role indicated by the candidate and job postings
-def getJobs(location_id, role_id):
+def getJobs(user_info):
   startup = {}
-  location_data = connectionInformation(connectTag(location_id))
+  location_data = connectionInformation(connectTag(user_info['location_id']))
   
   # If location and role match, return startup information
   for jobs_item in location_data['jobs']:
     for tags_item in jobs_item['tags']:
-      if tags_item['id'] == role_id:
+      if tags_item['id'] == user_info['role_id']:
         startup_data = jobs_item['startup']
         name = startup_data['name']
         startup[name] = startup_data['product_desc']
